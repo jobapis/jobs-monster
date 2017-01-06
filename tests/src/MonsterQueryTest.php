@@ -13,7 +13,7 @@ class MonsterQueryTest extends \PHPUnit_Framework_TestCase
     public function testItCanGetBaseUrl()
     {
         $this->assertEquals(
-            'http://www.jobinventory.com/rss',
+            'http://rss.jobsearch.monster.com/rssquery.ashx',
             $this->query->getBaseUrl()
         );
     }
@@ -40,12 +40,12 @@ class MonsterQueryTest extends \PHPUnit_Framework_TestCase
     public function testItCanAddAttributesToUrl()
     {
         $this->query->set('q', uniqid());
-        $this->query->set('l', uniqid());
+        $this->query->set('where', uniqid());
 
         $url = $this->query->getUrl();
 
         $this->assertContains('q=', $url);
-        $this->assertContains('l=', $url);
+        $this->assertContains('where=', $url);
     }
 
     /**
@@ -68,8 +68,8 @@ class MonsterQueryTest extends \PHPUnit_Framework_TestCase
     {
         $attributes = [
             'q' => uniqid(),
-            'l' => uniqid(),
-            'radius' => rand(1,100),
+            'where' => uniqid(),
+            'page' => rand(1,100),
         ];
 
         foreach ($attributes as $key => $value) {
