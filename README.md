@@ -19,6 +19,8 @@ composer require jobapis/jobs-monster
 
 ## Usage
 Create a Query object and add all the parameters you'd like via the constructor.
+
+*Note: The Monster RSS feed only provides jobs from the past 24 hours.*
  
 ```php
 // Add parameters to the query via the constructor
@@ -36,8 +38,8 @@ You can even chain them if you'd like.
 
 ```php
 // Add parameters via the set() method
-$query->set('l', 'Chicago, IL')
-    ->set('limit', '20');
+$query->set('where', 'Chicago, IL')
+    ->set('page', '2');
 ```
  
 Then inject the query object into the provider.
