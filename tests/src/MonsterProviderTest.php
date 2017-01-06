@@ -8,6 +8,11 @@ use Mockery as m;
 
 class MonsterProviderTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var MonsterProvider
+     */
+    public $client;
+
     public function setUp()
     {
         $this->query = m::mock(MonsterQuery::class);
@@ -59,13 +64,9 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
         $payload = $this->createJobArray();
 
         $this->query->shouldReceive('get')
-            ->with('l')
+            ->with('where')
             ->once()
             ->andReturn($location);
-        $this->query->shouldReceive('get')
-            ->with('company')
-            ->once()
-            ->andReturn(null);
 
         $results = $this->client->createJobObject($payload);
 
@@ -77,30 +78,6 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($location, $results->getLocation());
     }
 
-    public function testItCanCreateJobObjectWhenCompanySet()
-    {
-        $company = uniqid();
-        $payload = $this->createJobArray();
-
-        $this->query->shouldReceive('get')
-            ->with('company')
-            ->once()
-            ->andReturn($company);
-        $this->query->shouldReceive('get')
-            ->with('l')
-            ->once()
-            ->andReturn(null);
-
-        $results = $this->client->createJobObject($payload);
-
-        $this->assertInstanceOf(Job::class, $results);
-        $this->assertEquals($payload['title'], $results->getTitle());
-        $this->assertEquals($payload['title'], $results->getName());
-        $this->assertEquals($payload['description'], $results->getDescription());
-        $this->assertEquals($payload['link'], $results->getUrl());
-        $this->assertEquals($company, $results->getCompany());
-    }
-
     /**
      * Integration test for the client's getJobs() method.
      */
@@ -108,15 +85,15 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
     {
         $options = [
             'q' => uniqid(),
-            'l' => uniqid(),
-            't' => uniqid(),
+            'where' => uniqid(),
+            'page' => rand(1,5),
         ];
 
         $guzzle = m::mock('GuzzleHttp\Client');
 
-        $query = new JobinventoryQuery($options);
+        $query = new MonsterQuery($options);
 
-        $client = new JobinventoryProvider($query);
+        $client = new MonsterProvider($query);
 
         $client->setClient($guzzle);
 
@@ -148,12 +125,14 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
         }
 
         $keyword = 'engineering';
+        $location = 'chicago, il';
 
-        $query = new JobinventoryQuery([
+        $query = new MonsterQuery([
             'q' => $keyword,
+            'where' => $location,
         ]);
 
-        $client = new JobinventoryProvider($query);
+        $client = new MonsterProvider($query);
 
         $results = $client->getJobs();
 
@@ -161,6 +140,7 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
 
         foreach($results as $job) {
             $this->assertEquals($keyword, $job->query);
+            $this->assertEquals($location, $job->location);
         }
     }
 
@@ -176,6 +156,6 @@ class MonsterProviderTest extends \PHPUnit_Framework_TestCase
 
     private function createXmlResponse()
     {
-        return "<?xml version='1.0' encoding='UTF-8' ?><rss version='2.0'><channel><title>Hotel Jobs in Chicago, IL // JobInventory.com</title><item><title>Hotel Specialist Agents</title><link>http://www.jobinventory.com/d/Hotel-Specialist-Agents-Jobs-Chicago-IL-1391153840.html</link><description>Full-time/Regular 9:00 AM to 6:00 PM. 40 hours per week. (Overtime as required) The <b>hotel</b> ... Specialist Agents would pre pay all <b>hotel</b> rooms and help support the reservations team. JOB OVERVIEW work</description><pubDate>2015-04-11 00:48:39</pubDate></item><item><title>Maintenance_Hourly1</title><link>http://www.jobinventory.com/d/Maintenance_hourly1-Jobs-Chicago-IL-1583775509.html</link><description>Data not provided</description><pubDate>2016-05-17 18:13:26</pubDate></item></channel></rss>";
+        return "<rss version='2.0'><channel><title>Hotel Jobs in Chicago, IL // JobInventory.com</title><item><title>Hotel Specialist Agents</title><link>http://www.jobinventory.com/d/Hotel-Specialist-Agents-Jobs-Chicago-IL-1391153840.html</link><description>Full-time/Regular 9:00 AM to 6:00 PM. 40 hours per week. (Overtime as required) The <b>hotel</b> ... Specialist Agents would pre pay all <b>hotel</b> rooms and help support the reservations team. JOB OVERVIEW work</description><pubDate>2015-04-11 00:48:39</pubDate></item><item><title>Maintenance_Hourly1</title><link>http://www.jobinventory.com/d/Maintenance_hourly1-Jobs-Chicago-IL-1583775509.html</link><description>Data not provided</description><pubDate>2016-05-17 18:13:26</pubDate></item></channel></rss>";
     }
 }

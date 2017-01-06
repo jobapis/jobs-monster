@@ -23,13 +23,8 @@ class MonsterProvider extends AbstractProvider
         $job->setDatePostedAsString($payload['pubDate']);
 
         // Set a location if it was set in the query
-        if ($this->query && $this->query->get('l')) {
-            $job->setLocation($this->query->get('l'));
-        }
-
-        // Set a company if it was set in the query
-        if ($this->query && $this->query->get('company')) {
-            $job->setCompany($this->query->get('company'));
+        if ($this->query && $this->query->get('where')) {
+            $job->setLocation($this->query->get('where'));
         }
 
         return $job;
