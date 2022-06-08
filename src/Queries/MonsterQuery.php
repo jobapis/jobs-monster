@@ -56,8 +56,6 @@ class MonsterQuery extends AbstractQuery
      */
     protected function requiredAttributes()
     {
-        return [
-            'q',
-        ];
+        return [];
     }
 }
